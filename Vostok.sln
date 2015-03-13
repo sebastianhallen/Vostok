@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vostok", "Vostok\Vostok.csproj", "{52D1D90B-DF23-47AC-8755-EE82AF3607E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vostok.Test", "Vostok.Test\Vostok.Test.csproj", "{FBA84992-88C1-4A4D-96CE-A16ECF40310C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{52D1D90B-DF23-47AC-8755-EE82AF3607E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52D1D90B-DF23-47AC-8755-EE82AF3607E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52D1D90B-DF23-47AC-8755-EE82AF3607E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52D1D90B-DF23-47AC-8755-EE82AF3607E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBA84992-88C1-4A4D-96CE-A16ECF40310C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBA84992-88C1-4A4D-96CE-A16ECF40310C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBA84992-88C1-4A4D-96CE-A16ECF40310C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBA84992-88C1-4A4D-96CE-A16ECF40310C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

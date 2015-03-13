@@ -1,0 +1,60 @@
+﻿<html>
+	<body>
+		<p>
+			This page contains a element hierarchy that is removed and recreated continuously. <br />
+			The hierarchy has the ids: top, middle and bottom
+		</p>
+		<div id="container">
+			
+		</div>
+		<div id="mod10"></div>
+		<script>
+			var container = document.getElementById('container');
+			var mod10 = document.getElementById('mod10');
+			
+			function createElementHierarchy( bottomContent ) {
+				var topElement = document.createElement( 'div' );
+				topElement.setAttribute('id', 'top');
+
+				var middleElement = document.createElement('div');
+				middleElement.setAttribute('id', 'middle');
+
+				var bottomElement = document.createElement('div');
+				bottomElement.setAttribute('id', 'bottom');
+
+				var content = document.createTextNode( bottomContent );
+				bottomElement.appendChild( content );
+				middleElement.appendChild( bottomElement );
+				topElement.appendChild(middleElement);
+				container.appendChild(topElement);
+			};
+
+			function clearElementHierarchy() {
+				var topElement = document.getElementById('top');
+				if ( topElement ) {
+					container.removeChild( topElement );
+				}
+			}
+
+			function addTenCounterDiv() {
+				var tenDiv = document.createElement('div');
+				tenDiv.setAttribute('class', 'mod10');
+
+				mod10.appendChild(tenDiv);
+			}
+
+			function loopRecreation(index) {
+				clearElementHierarchy();
+				createElementHierarchy(index);
+
+				if (index % 10 === 0) {
+					addTenCounterDiv();
+				}
+
+				setTimeout( loopRecreation, 100, ++index );
+			}
+
+			loopRecreation( 0 );
+		</script>
+	</body>
+</html>
