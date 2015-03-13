@@ -21,19 +21,17 @@
         public void BeforeAll()
         {
             this.nancyThread = new Thread(() =>
-                {
-                    var configuration = new HostConfiguration();
-                    using (var nancy = new NancyHost(configuration, this.EndpointAddress))
+            {
+                    using (var nancy = new NancyHost(this.EndpointAddress))
                     {
                         nancy.Start();
                         this.signal.WaitOne();
                     }
                 });
             this.nancyThread.Start();
-
             var innerDriver = new ChromeDriver(chromeDriverDirectory);
             this.Driver = new VostokWebDriver(innerDriver);
-           // this.Driver = innerDriver;
+            //this.Driver = innerDriver;
         }
 
         [TestFixtureTearDown]
