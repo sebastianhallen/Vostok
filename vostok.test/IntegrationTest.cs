@@ -104,6 +104,15 @@
             Assert.That(divs.Count(), Is.GreaterThanOrEqualTo(5));
         }
 
+        [Test]
+        public void Should_be_able_to_select_elements_with_jQuery_selectors()
+        {
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/stale-element.html");
+
+            var byjQuery = this.Driver.FindElement(ByjQuery.Selector("[id='mod10']"));
+
+        }
+
         private void VerifyContentChanged(IWebElement element)
         {
             //wait for the bottom div to actually have some content
