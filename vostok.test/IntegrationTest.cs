@@ -13,13 +13,14 @@
         protected readonly Uri EndpointAddress = new Uri("http://localhost:1963");
         protected IWebDriver Driver;
 
-        private const string chromeDriverDirectory = @"ChromeDriver\2.13";
+        private const string chromeDriverDirectory = @"ChromeDriver\2.16";
         private readonly ManualResetEvent signal = new ManualResetEvent(false);
         private Thread nancyThread;
 
         [TestFixtureSetUp]
         public void BeforeAll()
         {
+            //disable shadow copying in your test runner otherwise you will get 404s when trying to get the static content
             this.nancyThread = new Thread(() =>
             {
                     using (var nancy = new NancyHost(this.EndpointAddress))
