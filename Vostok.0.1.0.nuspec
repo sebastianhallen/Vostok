@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Vostok</id>
+        <version>0.1.1</version>
+        <title>Vostok</title>
+        <authors>Sebastian Hallén</authors>
+        <owners>Sebastian Hallén</owners>
+        <licenseUrl>https://github.com/sebastianhallen/Vostok/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/sebastianhallen/Vostok</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Want to get rid of StaleElementReferenceException with a single line of code? Just wrap your instance of IWebDriver in a new VostokWebDriver: 
+
+IWebDriver driver = new ChromeDriver();
+driver = new VostokWebDriver(driver)
+
+
+When a StaleElementReferenceException is thrown Vostok will automatically do a new lookup of the same element and it's parent elements if needed.</description>
+        <summary>Vostok is a wrapper to Selenium that handles StaleElementReferenceException.</summary>
+        <releaseNotes>Vostok is a wrapper to Selenium that handles StaleElementReferenceException.</releaseNotes>
+        <copyright>Copyright Sebastian Hallen 2015</copyright>
+        <tags>Selenium WebDriver StaleElementReferenceException Browser Test</tags>
+        <dependencies>
+            <group>
+                <dependency id="Selenium.WebDriver" version="2.45.0" />
+            </group>
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="Vostok\bin\Release\Vostok.dll" target="lib\net45\Vostok.dll" />
+    </files>
+</package>
