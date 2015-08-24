@@ -8,7 +8,8 @@
     using OpenQA.Selenium.Internal;
 
     public class VostokWebElement
-        : IWebElement, IFindsByLinkText//, IFindsById, IFindsByName, IFindsByTagName, IFindsByClassName, IFindsByXPath, IFindsByPartialLinkText, IFindsByCssSelector, 
+        : IWebElement 
+        ,IFindsByLinkText, IFindsById, IFindsByName, IFindsByTagName, IFindsByClassName, IFindsByXPath, IFindsByPartialLinkText, IFindsByCssSelector
         ,IWrapsDriver, IWrapsElement, ILocatable, ITakesScreenshot
     {
         private readonly By selfSelector;
@@ -166,6 +167,76 @@
         public Screenshot GetScreenshot()
         {
             return this.Interact(lmnt => ((ITakesScreenshot) lmnt).GetScreenshot());
+        }
+
+        public IWebElement FindElementById(string id)
+        {
+            return this.Interact(lmnt => ((IFindsById) lmnt).FindElementById(id));
+        }
+
+        public ReadOnlyCollection<IWebElement> FindElementsById(string id)
+        {
+            return this.Interact(lmnt => ((IFindsById)lmnt).FindElementsById(id));
+        }
+
+        public IWebElement FindElementByName(string name)
+        {
+            return this.Interact(lmnt => ((IFindsByName)lmnt).FindElementByName(name));
+        }
+
+        public ReadOnlyCollection<IWebElement> FindElementsByName(string name)
+        {
+            return this.Interact(lmnt => ((IFindsByName)lmnt).FindElementsByName(name));
+        }
+
+        public IWebElement FindElementByTagName(string tagName)
+        {
+            return this.Interact(lmnt => ((IFindsByTagName)lmnt).FindElementByTagName(tagName));
+        }
+
+        public ReadOnlyCollection<IWebElement> FindElementsByTagName(string tagName)
+        {
+            return this.Interact(lmnt => ((IFindsByTagName)lmnt).FindElementsByTagName(tagName));
+        }
+
+        public IWebElement FindElementByClassName(string className)
+        {
+            return this.Interact(lmnt => ((IFindsByClassName)lmnt).FindElementByClassName(className));
+        }
+
+        public ReadOnlyCollection<IWebElement> FindElementsByClassName(string className)
+        {
+            return this.Interact(lmnt => ((IFindsByClassName)lmnt).FindElementsByClassName(className));
+        }
+
+        public IWebElement FindElementByXPath(string xpath)
+        {
+            return this.Interact(lmnt => ((IFindsByXPath)lmnt).FindElementByXPath(xpath));
+        }
+
+        public ReadOnlyCollection<IWebElement> FindElementsByXPath(string xpath)
+        {
+            return this.Interact(lmnt => ((IFindsByXPath)lmnt).FindElementsByXPath(xpath));
+        }
+
+        public IWebElement FindElementByPartialLinkText(string partialLinkText)
+        {
+            return this.Interact(lmnt => ((IFindsByPartialLinkText)lmnt).FindElementByPartialLinkText(partialLinkText));
+        }
+
+        public ReadOnlyCollection<IWebElement> FindElementsByPartialLinkText(string partialLinkText)
+        {
+            return this.Interact(lmnt => ((IFindsByPartialLinkText)lmnt).FindElementsByPartialLinkText(partialLinkText));
+        }
+
+        public IWebElement FindElementByCssSelector(string cssSelector)
+        {
+            return this.Interact(lmnt => ((IFindsByCssSelector)lmnt).FindElementByCssSelector(cssSelector));
+        }
+
+        public ReadOnlyCollection<IWebElement> FindElementsByCssSelector(string cssSelector)
+        {
+            return this.Interact(lmnt => ((IFindsByCssSelector)lmnt).FindElementsByCssSelector(cssSelector));
         }
     }
 }
