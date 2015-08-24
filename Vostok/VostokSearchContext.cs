@@ -52,7 +52,14 @@
                                                                         //each element must be able to re-resolve it self
                                                                         //in this case, re-resolve all elements again and just pick the
                                                                         //element that has the same index as before
-                                                                        return new VostokWebElement(lmnt, @by, this, ctx => this.selfLookup().FindElements(@by).ElementAt(index));
+                                                                        return new VostokWebElement(lmnt, @by, this,
+                                                                            ctx =>
+                                                                            {
+                                                                                var self = this.selfLookup();
+                                                                                var children = self.FindElements(@by);
+
+                                                                                return children.ElementAt(index);
+                                                                            });
                                                                     })
                 );
         }

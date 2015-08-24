@@ -8,7 +8,7 @@
     using OpenQA.Selenium;
 
     public class VostokWebDriver
-        : IWebDriver
+        : IWebDriver, IJavaScriptExecutor
     {
         private readonly IWebDriver driver;
         private readonly VostokSearchContext context;
@@ -83,6 +83,18 @@
         public ReadOnlyCollection<string> WindowHandles
         {
             get { return new EagerReadOnlyCollection<string>(() => this.driver.WindowHandles); }
+        }
+
+        public object ExecuteScript(string script, params object[] args)
+        {
+            var executor = (IJavaScriptExecutor) this.driver;
+            return executor.ExecuteScript(script, args);
+        }
+
+        public object ExecuteAsyncScript(string script, params object[] args)
+        {
+            var executor = (IJavaScriptExecutor)this.driver;
+            return executor.ExecuteAsyncScript(script, args);
         }
     }
 

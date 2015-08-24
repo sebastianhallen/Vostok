@@ -4,9 +4,12 @@
     using System.Collections.ObjectModel;
     using System.Drawing;
     using OpenQA.Selenium;
+    using OpenQA.Selenium.Interactions.Internal;
+    using OpenQA.Selenium.Internal;
 
     public class VostokWebElement
-        : IWebElement
+        : IWebElement, IFindsByLinkText//, IFindsById, IFindsByName, IFindsByTagName, IFindsByClassName, IFindsByXPath, IFindsByPartialLinkText, IFindsByCssSelector, 
+        ,IWrapsDriver, IWrapsElement, ILocatable, ITakesScreenshot
     {
         private readonly By selfSelector;
         private IWebElement element;
@@ -85,6 +88,84 @@
         private T Interact<T>(Func<IWebElement, T> query)
         {
             return VostokInteractionWrapper.Interact(ref this.element, this.selfSelector.ToString(), () => this.elementLookup(), query);
+        }
+
+
+        IWebElement IFindsByLinkText.FindElementByLinkText(string linkText)
+        {
+            return this.Interact(lmnt =>
+            {
+                var e = ((IFindsByLinkText)lmnt);
+                return e.FindElementByLinkText(linkText);
+            });
+        }
+
+        ReadOnlyCollection<IWebElement> IFindsByLinkText.FindElementsByLinkText(string linkText)
+        {
+            return this.Interact(lmnt =>
+            {
+                var e = ((IFindsByLinkText) lmnt);
+                return e.FindElementsByLinkText(linkText);
+            });
+        }
+
+        IWebDriver IWrapsDriver.WrappedDriver
+        {
+            get
+            {
+                var wrapper = (IWrapsDriver) this.element;
+                return wrapper.WrappedDriver;
+            }
+        }
+
+        public IWebElement WrappedElement
+        {
+            get
+            {
+                Func<IWebElement, IWebElement> unpack = e => e; 
+                unpack = e =>
+                {
+                    var innerWrapper = e as IWrapsElement;
+                    if (innerWrapper == null)
+                    {
+                        return e;
+                    }
+
+                    return unpack(innerWrapper.WrappedElement);
+                };
+
+
+                return this.Interact(lmnt => unpack(lmnt));
+            }
+        }
+
+        public Point LocationOnScreenOnceScrolledIntoView
+        {
+            get
+            {
+                return this.Interact(lmnt =>
+                {
+                    var locatable = (ILocatable) lmnt;
+                    return locatable.LocationOnScreenOnceScrolledIntoView;
+                });
+            }
+        }
+
+        public ICoordinates Coordinates
+        {
+            get
+            {
+                return this.Interact(lmnt =>
+                {
+                    var locatable = (ILocatable) lmnt;
+                    return locatable.Coordinates;
+                });
+            }
+        }
+
+        public Screenshot GetScreenshot()
+        {
+            return this.Interact(lmnt => ((ITakesScreenshot) lmnt).GetScreenshot());
         }
     }
 }
