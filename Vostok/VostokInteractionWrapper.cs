@@ -5,7 +5,7 @@
 
     public static class VostokInteractionWrapper
     {
-        public static void Interact(ref IWebElement element, string selfSelector, Action elementLookup, Action<IWebElement> query)
+        public static void Interact(ref IWebElement element, By selfSelector, Action elementLookup, Action<IWebElement> query)
         {
             Func<IWebElement, object> queryWrapper = e =>
                 {
@@ -15,7 +15,7 @@
             Interact(ref element, selfSelector, elementLookup, queryWrapper);
         }
 
-        public static T Interact<T>(ref IWebElement element, string selfSelector, Action elementLookup, Func<IWebElement, T> query)
+        public static T Interact<T>(ref IWebElement element, By selfSelector, Action elementLookup, Func<IWebElement, T> query)
         {
             try
             {

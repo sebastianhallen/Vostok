@@ -83,12 +83,12 @@
 
         private void Interact(Action<IWebElement> query)
         {
-            VostokInteractionWrapper.Interact(ref this.element, this.selfSelector.ToString(), () => this.elementLookup(), query);
+            VostokInteractionWrapper.Interact(ref this.element, this.selfSelector, () => this.elementLookup(), query);
         }
 
         private T Interact<T>(Func<IWebElement, T> query)
         {
-            return VostokInteractionWrapper.Interact(ref this.element, this.selfSelector.ToString(), () => this.elementLookup(), query);
+            return VostokInteractionWrapper.Interact(ref this.element, this.selfSelector, () => this.elementLookup(), query);
         }
 
 

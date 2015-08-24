@@ -27,7 +27,7 @@
                 //Console.WriteLine("element->element: {0}", @by);
                 return VostokInteractionWrapper.Interact(
                         ref element, 
-                        this.selfSelector.ToString(), 
+                        this.selfSelector, 
                         () => this.selfLookup(), 
                         lmnt => new VostokWebElement(lmnt, selfSelector, this, ctx => ctx.FindElement(@by))
                 );
@@ -45,7 +45,7 @@
             
             return new EagerReadOnlyCollection<IWebElement>(() =>
                                                             (element != null
-                                                                 ? VostokInteractionWrapper.Interact(ref element, this.selfSelector.ToString(), () => this.selfLookup(), lmnt => this.selfLookup().FindElements(@by))
+                                                                 ? VostokInteractionWrapper.Interact(ref element, this.selfSelector, () => this.selfLookup(), lmnt => this.selfLookup().FindElements(@by))
                                                                  : this.context.FindElements(@by))
                                                                 .Select((lmnt, index) =>
                                                                     {
