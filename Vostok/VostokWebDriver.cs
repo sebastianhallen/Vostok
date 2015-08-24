@@ -8,7 +8,7 @@
     using OpenQA.Selenium;
 
     public class VostokWebDriver
-        : IWebDriver, IJavaScriptExecutor
+        : IWebDriver, IJavaScriptExecutor, ITakesScreenshot, IHasInputDevices, IHasCapabilities, IAllowsFileDetection
     {
         private readonly IWebDriver driver;
         private readonly VostokSearchContext context;
@@ -95,6 +95,32 @@
         {
             var executor = (IJavaScriptExecutor)this.driver;
             return executor.ExecuteAsyncScript(script, args);
+        }
+
+        public Screenshot GetScreenshot()
+        {
+            return ((ITakesScreenshot) this.driver).GetScreenshot();
+        }
+
+        public IKeyboard Keyboard
+        {
+            get { return ((IHasInputDevices) this.driver).Keyboard; }
+        }
+
+        public IMouse Mouse
+        {
+            get { return ((IHasInputDevices) this.driver).Mouse; }
+        }
+
+        public ICapabilities Capabilities
+        {
+            get { return ((IHasCapabilities)this.driver).Capabilities; }
+        }
+
+        public IFileDetector FileDetector
+        {
+            get { return ((IAllowsFileDetection)this.driver).FileDetector; }
+            set { ((IAllowsFileDetection)this.driver).FileDetector = value; }
         }
     }
 
