@@ -16,7 +16,7 @@
         public VostokWebDriver(IWebDriver driver)
         {
             this.driver = driver;
-            this.context = new VostokSearchContext(null, this.driver, () => null);
+            this.context = new VostokSearchContext(null, this.driver, null);
         }
 
         public IWebElement FindElement(By @by)

@@ -55,8 +55,9 @@
                                                                         return new VostokWebElement(lmnt, @by, this,
                                                                             ctx =>
                                                                             {
-                                                                                var self = this.selfLookup();
-                                                                                var children = self.FindElements(@by);
+                                                                                var children = selfLookup == null
+                                                                                    ? this.context.FindElements(@by)
+                                                                                    : this.selfLookup().FindElements(@by);
 
                                                                                 return children.ElementAt(index);
                                                                             });
