@@ -14,23 +14,46 @@
     {
         private readonly By selfSelector;
         private IWebElement element;
+        private Uri origin;
+
         private readonly VostokSearchContext context;
         private readonly Func<IWebElement> elementLookup;
         public VostokWebElement(IWebElement element, By selfSelector, ISearchContext parent, Func<ISearchContext, IWebElement> selfLookup)
         {
             this.selfSelector = selfSelector;
             this.element = element;
+            this.origin = this.DetermineOrigin(this.element);
             this.elementLookup = () =>
                 {
+                    //has the element become stale and been null:ed by VostokInteractionWrapper
                     if (this.element == null)
                     {
                         //Console.WriteLine("resolving: {0}", selfSelector);
                         this.element = selfLookup(parent);
+                        var currentUri = this.DetermineOrigin(this.element);
+
+                        if (this.origin != null && !this.origin.Equals(currentUri))
+                        {
+                            var message = string.Format("Navigation occured between resolving elements. Original element was resolved on {0} but a StaleElementReferenceException caused it to be re-resolved on {1}", this.origin, currentUri);
+                            throw new InvalidElementStateException(message);
+                        }
                     }
 
                     return this.element;
                 };
             this.context = new VostokSearchContext(selfSelector, this, this.elementLookup);
+        }
+
+        private Uri DetermineOrigin(IWebElement lmnt)
+        {
+            var driver = lmnt as IWrapsDriver;
+
+            if (driver == null)
+            {
+                return null;
+            }
+
+            return new Uri(driver.WrappedDriver.Url);
         }
 
         public IWebElement FindElement(By @by)

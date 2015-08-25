@@ -105,6 +105,7 @@
             Assert.That(divs.Count(), Is.GreaterThanOrEqualTo(5));
         }
 
+        
         private void VerifyContentChanged(IWebElement element)
         {
             //wait for the bottom div to actually have some content
@@ -118,6 +119,44 @@
                 .ForNoLongerThan(TimeSpan.FromSeconds(5))
                 .Until(() => !text.Equals(updateText));
             Assert.That(text, Is.Not.EqualTo(updateText));
+        }
+    }
+
+    [TestFixture]
+    public class OriginReResolveGuard : IntegrationTest
+    {
+        [Test]
+        public void Should_not_allow_re_resolve_of_elements_that_originiate_from_a_page_with_another_url()
+        {
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-0.html");
+            var div = this.Driver.FindElement(By.Id("foo"));
+
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-1.html");
+
+            Assert.Throws<InvalidElementStateException>(() => div.Click());
+        }
+
+        [Test]
+        public void Should_allow_re_resolve_elements_that_originiate_from_the_same_url_with_different_hash()
+        {
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-0.html");
+            var div = this.Driver.FindElement(By.Id("foo"));
+
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-1.html");
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-0.html#same-same-but-different");
+
+            Assert.That(div.Text, Is.EqualTo("Bar"));
+        }
+
+        [Test]
+        public void Should_not_allow_re_resolve_elements_that_originiate_from_the_same_url_with_different_query()
+        {
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-0.html?foo=bar");
+            var div = this.Driver.FindElement(By.Id("foo"));
+
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-0.html?bar=baz");
+
+            Assert.Throws<InvalidElementStateException>(() => div.Click());
         }
     }
 }

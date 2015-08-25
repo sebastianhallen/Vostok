@@ -25,6 +25,8 @@
             catch (StaleElementReferenceException)
             {
                 //Console.WriteLine("Element '{0}' is stale.", selfSelector);
+                
+                //note that this clears the element that is now stale but keeps the internal reference so we can re-resolve it to the same variable higher up
                 element = null;
                 return Interact(ref element, selfSelector, elementLookup, query);
             }
