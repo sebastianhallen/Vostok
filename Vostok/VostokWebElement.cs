@@ -3,6 +3,7 @@
     using System;
     using System.Collections.ObjectModel;
     using System.Drawing;
+    using System.Runtime.Remoting.Channels;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Interactions.Internal;
     using OpenQA.Selenium.Internal;
@@ -12,14 +13,16 @@
         ,IFindsByLinkText, IFindsById, IFindsByName, IFindsByTagName, IFindsByClassName, IFindsByXPath, IFindsByPartialLinkText, IFindsByCssSelector
         ,IWrapsDriver, IWrapsElement, ILocatable, ITakesScreenshot
     {
+        private readonly VostokSettings settings;
         private readonly By selfSelector;
         private IWebElement element;
-        private Uri origin;
+        private readonly Uri origin;
 
         private readonly VostokSearchContext context;
         private readonly Func<IWebElement> elementLookup;
-        public VostokWebElement(IWebElement element, By selfSelector, ISearchContext parent, Func<ISearchContext, IWebElement> selfLookup)
+        public VostokWebElement(VostokSettings settings, IWebElement element, By selfSelector, ISearchContext parent, Func<ISearchContext, IWebElement> selfLookup)
         {
+            this.settings = settings;
             this.selfSelector = selfSelector;
             this.element = element;
             this.origin = this.DetermineOrigin(this.element);
@@ -30,18 +33,52 @@
                     {
                         //Console.WriteLine("resolving: {0}", selfSelector);
                         this.element = selfLookup(parent);
+                                                
                         var currentUri = this.DetermineOrigin(this.element);
 
-                        if (this.origin != null && !this.origin.Equals(currentUri))
+                        if (this.origin != null)
                         {
-                            var message = string.Format("Navigation occured between resolving elements. Original element was resolved on {0} but a StaleElementReferenceException caused it to be re-resolved on {1}", this.origin, currentUri);
-                            throw new InvalidElementStateException(message);
+                            if (!this.MatchesOriginStrictnessLevel(currentUri))
+                            {
+                                var message = string.Format("Navigation occured between resolving elements. Original element was resolved on {0} but a StaleElementReferenceException caused it to be re-resolved on {1}. You can control the sensitivty of this check by changing SamePageOriginStrictness in the settings passed to the VostokWebDriver", this.origin, currentUri);
+                                throw new InvalidElementStateException(message);
+                            }
                         }
                     }
 
                     return this.element;
                 };
-            this.context = new VostokSearchContext(selfSelector, this, this.elementLookup);
+            this.context = new VostokSearchContext(this.settings, selfSelector, this, this.elementLookup);
+        }
+
+        private bool MatchesOriginStrictnessLevel(Uri currentUri)
+        {
+            switch (this.settings.SamePageOriginStrictness)
+            {
+                case PageOriginStrictness.DontCheckOrigin:
+                {
+                    return true;
+                }
+                case PageOriginStrictness.AllowNonMatchingAnchorHashes:
+                {
+                    var originHash0 = this.origin.Scheme + this.origin.Authority + this.origin.Port + this.origin.PathAndQuery;
+                    var currentHash0 = currentUri.Scheme + currentUri.Authority + currentUri.Port + currentUri.PathAndQuery;
+                    return originHash0.Equals(currentHash0);
+                }
+
+                case PageOriginStrictness.AllowNonMatchingQueryStrings:
+                {
+                    var originHash1 = this.origin.Scheme + this.origin.Authority + this.origin.Port + this.origin.AbsolutePath;
+                    var currentHash1 = currentUri.Scheme + currentUri.Authority + currentUri.Port + currentUri.AbsolutePath;
+                    return originHash1.Equals(currentHash1);
+                }
+                case PageOriginStrictness.ExactMatch:
+                {
+                    return this.origin.ToString().Equals(currentUri.ToString());
+                }
+            }
+
+            throw new Exception("Unhandled PageOriginStrictness setting: " + this.settings);
         }
 
         private Uri DetermineOrigin(IWebElement lmnt)

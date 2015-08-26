@@ -49,6 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VostokInteractionWrapper.cs" />
     <Compile Include="VostokSearchContext.cs" />
+    <Compile Include="VostokSettings.cs" />
     <Compile Include="VostokWebDriver.cs" />
     <Compile Include="VostokWebElement.cs" />
   </ItemGroup>

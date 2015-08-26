@@ -8,12 +8,14 @@
     public class VostokSearchContext
         : ISearchContext
     {
+        private readonly VostokSettings settings;
         private readonly By selfSelector;
         private readonly ISearchContext context;
         private readonly Func<IWebElement> selfLookup;
 
-        public VostokSearchContext(By selfSelector, ISearchContext context, Func<IWebElement> selfLookup)
+        public VostokSearchContext(VostokSettings settings, By selfSelector, ISearchContext context, Func<IWebElement> selfLookup)
         {
+            this.settings = settings;
             this.selfSelector = selfSelector;
             this.context = context;
             this.selfLookup = selfLookup;
@@ -29,14 +31,14 @@
                         ref element, 
                         this.selfSelector, 
                         () => this.selfLookup(), 
-                        lmnt => new VostokWebElement(lmnt, selfSelector, this, ctx => ctx.FindElement(@by))
+                        lmnt => new VostokWebElement(this.settings, lmnt, selfSelector, this, ctx => ctx.FindElement(@by))
                 );
             }
 
             //context is IWebDriver, no need to guard for stale element
             //Console.WriteLine("driver->element: {0}", @by);
             element = this.context.FindElement(@by);
-            return new VostokWebElement(element, @by, this.context, ctx => ctx.FindElement(@by));
+            return new VostokWebElement(this.settings, element, @by, this.context, ctx => ctx.FindElement(@by));
         }
 
         public ReadOnlyCollection<IWebElement> FindElements(By @by)
@@ -52,7 +54,7 @@
                                                                         //each element must be able to re-resolve it self
                                                                         //in this case, re-resolve all elements again and just pick the
                                                                         //element that has the same index as before
-                                                                        return new VostokWebElement(lmnt, @by, this,
+                                                                        return new VostokWebElement(this.settings, lmnt, @by, this,
                                                                             ctx =>
                                                                             {
                                                                                 var children = selfLookup == null

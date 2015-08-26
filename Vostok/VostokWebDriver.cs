@@ -13,10 +13,19 @@
         private readonly IWebDriver driver;
         private readonly VostokSearchContext context;
 
+        public VostokSettings Settings { get; private set; }
+
         public VostokWebDriver(IWebDriver driver)
+            : this(driver, VostokSettings.Default)
+        {
+            
+        }
+
+        public VostokWebDriver(IWebDriver driver, VostokSettings settings)
         {
             this.driver = driver;
-            this.context = new VostokSearchContext(null, this.driver, null);
+            this.Settings = settings;
+            this.context = new VostokSearchContext(this.Settings, null, this.driver, null);
         }
 
         public IWebElement FindElement(By @by)

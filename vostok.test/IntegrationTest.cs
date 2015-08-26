@@ -12,6 +12,8 @@
     {
         protected readonly Uri EndpointAddress = new Uri("http://localhost:1963");
         protected IWebDriver Driver;
+        protected VostokSettings Settings;
+
 
         private const string chromeDriverDirectory = @"ChromeDriver\2.16";
         private readonly ManualResetEvent signal = new ManualResetEvent(false);
@@ -30,8 +32,10 @@
                     }
                 });
             this.nancyThread.Start();
+
+            this.Settings = new VostokSettings();
             var innerDriver = new ChromeDriver(chromeDriverDirectory);
-            this.Driver = new VostokWebDriver(innerDriver);
+            this.Driver = new VostokWebDriver(innerDriver, this.Settings);
             //this.Driver = innerDriver;
         }
 
@@ -125,38 +129,106 @@
     [TestFixture]
     public class OriginReResolveGuard : IntegrationTest
     {
-        [Test]
-        public void Should_not_allow_re_resolve_of_elements_that_originiate_from_a_page_with_another_url()
+        [TestCase(PageOriginStrictness.AllowNonMatchingAnchorHashes)]
+        [TestCase(PageOriginStrictness.AllowNonMatchingQueryStrings)]
+        [TestCase(PageOriginStrictness.ExactMatch)]
+        public void Should_not_allow_re_resolve_of_elements_that_originiate_from_a_page_with_another_url_when_checking_origin(PageOriginStrictness level)
         {
-            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-0.html");
+            this.Settings.SamePageOriginStrictness = level;
+
+            this.Open("origin-0.html");
             var div = this.Driver.FindElement(By.Id("foo"));
 
-            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-1.html");
+            this.Open("origin-1.html");
 
             Assert.Throws<InvalidElementStateException>(() => div.Click());
         }
 
         [Test]
-        public void Should_allow_re_resolve_elements_that_originiate_from_the_same_url_with_different_hash()
+        public void Should_allow_re_resolve_of_elements_that_originiate_from_a_page_with_another_url_when_not_checking_origin()
         {
-            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-0.html");
+            this.Settings.SamePageOriginStrictness = PageOriginStrictness.DontCheckOrigin;
+
+            this.Open("origin-0.html");
             var div = this.Driver.FindElement(By.Id("foo"));
 
-            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-1.html");
-            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-0.html#same-same-but-different");
+            this.Open("origin-1.html");
+
+            Assert.That(div.Text, Is.EqualTo("Baz"));
+        }
+
+        [TestCase(PageOriginStrictness.AllowNonMatchingAnchorHashes)]
+        [TestCase(PageOriginStrictness.AllowNonMatchingQueryStrings)]
+        public void Should_allow_re_resolve_of_elements_that_originiate_from_the_same_url_with_different_hash(PageOriginStrictness level)
+        {
+            this.Settings.SamePageOriginStrictness = level;
+            this.Open("origin-0.html");
+            var div = this.Driver.FindElement(By.Id("foo"));
+
+            this.Open("origin-1.html");
+            this.Open("origin-0.html#same-same-but-different");
 
             Assert.That(div.Text, Is.EqualTo("Bar"));
         }
 
         [Test]
-        public void Should_not_allow_re_resolve_elements_that_originiate_from_the_same_url_with_different_query()
+        public void Should_not_allow_re_resolve_elements_that_originiate_from_the_same_url_with_different_query_with_AllowNonMatchingAnchorHashes()
         {
-            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-0.html?foo=bar");
+            this.Settings.SamePageOriginStrictness = PageOriginStrictness.AllowNonMatchingAnchorHashes;
+            this.Open("origin-0.html?foo=bar");
             var div = this.Driver.FindElement(By.Id("foo"));
 
-            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/origin-0.html?bar=baz");
+            this.Open("origin-0.html?bar=baz");
 
             Assert.Throws<InvalidElementStateException>(() => div.Click());
         }
+
+        [Test]
+        public void Should_allow_re_resolve_of_elements_that_originiate_from_the_same_url_with_different_query_with_AllowNonMatchingQueryStrings()
+        {
+            this.Settings.SamePageOriginStrictness = PageOriginStrictness.AllowNonMatchingQueryStrings;
+
+            this.Open("origin-0.html?foo=bar");
+            var div = this.Driver.FindElement(By.Id("foo"));
+
+            this.Open("origin-0.html?bar=baz");
+            Assert.That(div.Text, Is.EqualTo("Bar"));
+        }
+
+        [Test]
+        public void Should_allow_re_resolve_of_elements_when_urls_match_exactly_with_ExactMatch()
+        {
+            this.Settings.SamePageOriginStrictness = PageOriginStrictness.ExactMatch;
+            this.Open("origin-0.html?foo=bar#baz");
+            
+
+            var div = this.Driver.FindElement(By.Id("foo"));
+            this.Open("origin-1.html");
+
+            this.Open("origin-0.html?foo=bar#baz");
+            Assert.That(div.Text, Is.EqualTo("Bar"));
+        }
+
+        [TestCase("origin-0.html?foo=bar#baz", "origin-0.html?foo=bar#baz1")]
+        [TestCase("origin-0.html?foo=bar#baz", "origin-0.html?foo=foo#baz")]
+        [TestCase("origin-0.html?foo=bar#baz", "origin-0.html")]
+        [TestCase("origin-0.html", "origin-0.html?foo=bar#baz")]
+        public void Should_not_allow_re_resolve_of_elements_when_urls_dont_match_exactly_with_ExactMatch(string first, string second)
+        {
+            this.Settings.SamePageOriginStrictness = PageOriginStrictness.ExactMatch;
+            this.Open(first);
+
+            var div = this.Driver.FindElement(By.Id("foo"));
+            this.Open("origin-1.html");
+
+            this.Open(second);
+            Assert.Throws<InvalidElementStateException>(() => div.Click());
+        }
+
+        private void Open(string route)
+        {
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/" + route);
+        }
     }
 }
+
