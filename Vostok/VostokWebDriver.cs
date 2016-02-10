@@ -96,13 +96,17 @@
 
         public object ExecuteScript(string script, params object[] args)
         {
-            var executor = (IJavaScriptExecutor) this.driver;
+            var executor = (IJavaScriptExecutor)this.driver;
+
+            this.RefreshElements(args);
             return executor.ExecuteScript(script, args);
         }
-
+        
         public object ExecuteAsyncScript(string script, params object[] args)
         {
             var executor = (IJavaScriptExecutor)this.driver;
+
+            this.RefreshElements(args);
             return executor.ExecuteAsyncScript(script, args);
         }
 
@@ -130,6 +134,16 @@
         {
             get { return ((IAllowsFileDetection)this.driver).FileDetector; }
             set { ((IAllowsFileDetection)this.driver).FileDetector = value; }
+        }
+
+        private void RefreshElements(params object[] args)
+        {
+            var vostokElements = args.Where(arg => arg is VostokWebElement).Cast<VostokWebElement>().ToArray();
+            foreach (var element in vostokElements)
+            {
+                var _ = element.Text;
+                var __ = " " + _;
+            }
         }
     }
 

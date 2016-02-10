@@ -1,0 +1,20 @@
+﻿<html>
+<body>
+  <script>
+    function recreateFooParagraph() {
+      var foo = document.getElementById('foo');
+      var child = foo.getElementsByTagName('p')[0];
+      child.remove();
+      
+      var newParagraph = document.createElement('p');
+      foo.appendChild(newParagraph);
+
+      newParagraph.textContent = 're-created';
+    }
+  </script>
+  <div id="foo">
+    <p>to be removed</p>
+  </div>
+  <a href="javascript:recreateFooParagraph()">re-create element</a>
+</body>
+</html>

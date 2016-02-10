@@ -15,7 +15,7 @@
         protected VostokSettings Settings;
 
 
-        private const string chromeDriverDirectory = @"ChromeDriver\2.16";
+        private const string chromeDriverDirectory = @"ChromeDriver\2.21";
         private readonly ManualResetEvent signal = new ManualResetEvent(false);
         private Thread nancyThread;
 
@@ -59,6 +59,24 @@
         public void BeforeEach()
         {
             this.retrier = new Retrier(new RetryTimerFactory());
+        }
+
+        [Test]
+        public void Should_reresolve_vostok_element_arguments_before_running_script()
+        {
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/changing-element.html");
+
+            var recreatedElement = this.Driver.FindElement(By.CssSelector("[id='foo'] p"));
+            var removeLink = this.Driver.FindElement(By.TagName("a"));
+            removeLink.Click();
+            this.retrier.DoUntil(() => { }, () =>
+            {
+                var text = this.Driver.FindElement(By.CssSelector("[id='foo'] p")).Text;
+                return "re-created".Equals(text);
+            });
+        
+
+            (this.Driver as IJavaScriptExecutor).ExecuteScript("console.log('this should not be possible')", recreatedElement);
         }
 
         [Test]
