@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
 
 namespace Vostok.Test
 {
@@ -62,7 +63,12 @@ namespace Vostok.Test
         {
             this.retrier = new Retrier(new RetryTimerFactory());
             this.log = new StringBuilder();
-            this.Settings.DebugLogger = message => this.log.AppendLine(message);
+            //File.WriteAllText(@"C:\temp\vostok.log", "new test");
+            this.Settings.DebugLogger = message =>
+            {
+                this.log.AppendLine(message);
+                //File.AppendAllText(@"C:\temp\vostok.log", message + Environment.NewLine);
+            };
         }
 
         [TearDown]
