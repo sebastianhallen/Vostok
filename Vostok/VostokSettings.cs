@@ -34,14 +34,18 @@ namespace Vostok
         public PageOriginStrictness SamePageOriginStrictness { get; set; }
         public Action<string> DebugLogger { get; set; }
 
+        public VostokSettings()
+        {
+            this.DebugLogger = _ => { };
+        }
+
         public static VostokSettings Default
         {
             get
             {
                 return new VostokSettings
                 {
-                    SamePageOriginStrictness = PageOriginStrictness.AllowNonMatchingAnchorHashes,
-                    DebugLogger = _ => { }
+                    SamePageOriginStrictness = PageOriginStrictness.AllowNonMatchingAnchorHashes
                 };
             }
         }
