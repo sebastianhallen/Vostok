@@ -26,17 +26,18 @@
             var element = this.context as IWebElement;
             if (element != null)
             {
-                //Console.WriteLine("element->element: {0}", @by);
+                this.settings.DebugLogger(string.Format("element->element: {0}", @by));
                 return VostokInteractionWrapper.Interact(
                         ref element, 
                         this.selfSelector, 
                         () => this.selfLookup(), 
-                        lmnt => new VostokWebElement(this.settings, lmnt, selfSelector, this, ctx => ctx.FindElement(@by))
+                        lmnt => new VostokWebElement(this.settings, lmnt, selfSelector, this, ctx => ctx.FindElement(@by)),
+                        this.settings
                 );
             }
 
             //context is IWebDriver, no need to guard for stale element
-            //Console.WriteLine("driver->element: {0}", @by);
+            this.settings.DebugLogger(string.Format("driver->element: {0}", @by));
             element = this.context.FindElement(@by);
             return new VostokWebElement(this.settings, element, @by, this.context, ctx => ctx.FindElement(@by));
         }
@@ -47,7 +48,7 @@
             
             return new EagerReadOnlyCollection<IWebElement>(() =>
                                                             (element != null
-                                                                 ? VostokInteractionWrapper.Interact(ref element, this.selfSelector, () => this.selfLookup(), lmnt => this.selfLookup().FindElements(@by))
+                                                                 ? VostokInteractionWrapper.Interact(ref element, this.selfSelector, () => this.selfLookup(), lmnt => this.selfLookup().FindElements(@by), this.settings)
                                                                  : this.context.FindElements(@by))
                                                                 .Select((lmnt, index) =>
                                                                     {

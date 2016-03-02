@@ -1,4 +1,6 @@
-﻿namespace Vostok.Test
+﻿using System.Text;
+
+namespace Vostok.Test
 {
     using System;
     using System.Linq;
@@ -13,7 +15,6 @@
         protected readonly Uri EndpointAddress = new Uri("http://localhost:1963");
         protected IWebDriver Driver;
         protected VostokSettings Settings;
-
 
         private const string chromeDriverDirectory = @"ChromeDriver\2.21";
         private readonly ManualResetEvent signal = new ManualResetEvent(false);
@@ -54,12 +55,22 @@
         : IntegrationTest
     {
         private IRetrier retrier;
+        private StringBuilder log;
 
         [SetUp]
         public void BeforeEach()
         {
             this.retrier = new Retrier(new RetryTimerFactory());
+            this.log = new StringBuilder();
+            this.Settings.DebugLogger = message => this.log.AppendLine(message);
         }
+
+        [TearDown]
+        public void AfterEach()
+        {
+            Console.WriteLine(this.log);
+        }
+
 
         [Test]
         public void Should_reresolve_vostok_element_arguments_before_running_script()

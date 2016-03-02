@@ -3,7 +3,6 @@
     using System;
     using System.Collections.ObjectModel;
     using System.Drawing;
-    using System.Runtime.Remoting.Channels;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Interactions.Internal;
     using OpenQA.Selenium.Internal;
@@ -31,7 +30,7 @@
                     //has the element become stale and been null:ed by VostokInteractionWrapper
                     if (this.element == null)
                     {
-                        //Console.WriteLine("resolving: {0}", selfSelector);
+                        this.settings.DebugLogger(string.Format("resolving: {0}", selfSelector));
                         this.element = selfLookup(parent);
                                                 
                         var currentUri = this.DetermineOrigin(this.element);
@@ -143,12 +142,12 @@
 
         private void Interact(Action<IWebElement> query)
         {
-            VostokInteractionWrapper.Interact(ref this.element, this.selfSelector, () => this.elementLookup(), query);
+            VostokInteractionWrapper.Interact(ref this.element, this.selfSelector, () => this.elementLookup(), query, this.settings);
         }
 
         private T Interact<T>(Func<IWebElement, T> query)
         {
-            return VostokInteractionWrapper.Interact(ref this.element, this.selfSelector, () => this.elementLookup(), query);
+            return VostokInteractionWrapper.Interact(ref this.element, this.selfSelector, () => this.elementLookup(), query, this.settings);
         }
 
 

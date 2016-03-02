@@ -1,3 +1,5 @@
+using System;
+
 namespace Vostok
 {
     public enum PageOriginStrictness
@@ -30,6 +32,7 @@ namespace Vostok
         /// Setting for when to allow re-resolving of elements
         /// </summary>
         public PageOriginStrictness SamePageOriginStrictness { get; set; }
+        public Action<string> DebugLogger { get; set; }
 
         public static VostokSettings Default
         {
@@ -37,7 +40,8 @@ namespace Vostok
             {
                 return new VostokSettings
                 {
-                    SamePageOriginStrictness = PageOriginStrictness.AllowNonMatchingAnchorHashes
+                    SamePageOriginStrictness = PageOriginStrictness.AllowNonMatchingAnchorHashes,
+                    DebugLogger = _ => { }
                 };
             }
         }
