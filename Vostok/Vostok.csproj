@@ -47,7 +47,6 @@
     <Compile Include="Retrier.cs" />
     <Compile Include="IRetrier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VostokInteractionWrapper.cs" />
     <Compile Include="VostokSearchContext.cs" />
     <Compile Include="VostokSettings.cs" />
     <Compile Include="VostokWebDriver.cs" />

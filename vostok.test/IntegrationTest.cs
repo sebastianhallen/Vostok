@@ -71,6 +71,26 @@ namespace Vostok.Test
             Console.WriteLine(this.log);
         }
 
+        [Test]
+        public void Should_be_able_to_reresolve_an_element_after_refreshing_a_page()
+        {
+            //find original element
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/changing-element.html");
+            var element = this.Driver.FindElement(By.CssSelector("[id='foo'] p"));
+
+            //invalidate it...
+            var removeLink = this.Driver.FindElement(By.TagName("a"));
+            removeLink.Click();
+            this.retrier.DoUntil(() => { }, () =>
+            {
+                var text = this.Driver.FindElement(By.CssSelector("[id='foo'] p")).Text;
+                return "re-created".Equals(text);
+            });
+            // refresh page to restore state
+            this.Driver.Navigate().Refresh();
+
+            Assert.That(element.Text, Is.EqualTo("to be removed"));
+        }
 
         [Test]
         public void Should_reresolve_vostok_element_arguments_before_running_script()

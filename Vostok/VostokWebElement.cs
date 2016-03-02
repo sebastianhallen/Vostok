@@ -27,25 +27,21 @@
             this.origin = this.DetermineOrigin(this.element);
             this.elementLookup = () =>
                 {
-                    //has the element become stale and been null:ed by VostokInteractionWrapper
-                    if (this.element == null)
-                    {
-                        this.settings.DebugLogger(string.Format("resolving: {0}", selfSelector));
-                        this.element = selfLookup(parent);
-                                                
-                        var currentUri = this.DetermineOrigin(this.element);
+                    this.settings.DebugLogger($"resolving: {this.selfSelector}");
+                    var lookedupElement = selfLookup(parent);
 
-                        if (this.origin != null)
+                    var currentUri = this.DetermineOrigin(this.element);
+
+                    if (this.origin != null)
+                    {
+                        if (!this.MatchesOriginStrictnessLevel(currentUri))
                         {
-                            if (!this.MatchesOriginStrictnessLevel(currentUri))
-                            {
-                                var message = string.Format("Navigation occured between resolving elements. Original element was resolved on {0} but a StaleElementReferenceException caused it to be re-resolved on {1}. You can control the sensitivty of this check by changing SamePageOriginStrictness in the settings passed to the VostokWebDriver", this.origin, currentUri);
-                                throw new InvalidElementStateException(message);
-                            }
+                            var message = $"Navigation occured between resolving elements. Original element was resolved on {this.origin} but a StaleElementReferenceException caused it to be re-resolved on {currentUri}. You can control the sensitivty of this check by changing SamePageOriginStrictness in the settings passed to the VostokWebDriver";
+                            throw new InvalidElementStateException(message);
                         }
                     }
 
-                    return this.element;
+                    return lookedupElement;
                 };
             this.context = new VostokSearchContext(this.settings, selfSelector, this, this.elementLookup);
         }
@@ -142,12 +138,32 @@
 
         private void Interact(Action<IWebElement> query)
         {
-            VostokInteractionWrapper.Interact(ref this.element, this.selfSelector, () => this.elementLookup(), query, this.settings);
+            try
+            {
+                query(this.element);
+            }
+            catch (StaleElementReferenceException)
+            {
+                this.settings.DebugLogger($"Element '{this.selfSelector}' is stale.");
+
+                this.element = this.elementLookup();
+                this.Interact(query);
+            }
         }
 
         private T Interact<T>(Func<IWebElement, T> query)
         {
-            return VostokInteractionWrapper.Interact(ref this.element, this.selfSelector, () => this.elementLookup(), query, this.settings);
+            try
+            {
+                return query(this.element);
+            }
+            catch (StaleElementReferenceException)
+            {
+                this.settings.DebugLogger($"Element '{this.selfSelector}' is stale.");
+
+                this.element = this.elementLookup();
+                return this.Interact(query);
+            }
         }
 
 
