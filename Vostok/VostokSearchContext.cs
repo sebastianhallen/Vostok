@@ -55,7 +55,7 @@
             {
                 if (element != null)
                 {
-                    this.settings.DebugLogger($"element->element: {@by}");
+                    this.settings.DebugLogger($"element->elements: {@by}");
                     try
                     {
                         element = this.selfLookup();
