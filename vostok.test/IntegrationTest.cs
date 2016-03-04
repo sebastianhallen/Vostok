@@ -64,11 +64,11 @@ namespace Vostok.Test
         {
             this.retrier = new Retrier(new RetryTimerFactory());
             this.log = new StringBuilder();
-            //File.WriteAllText(@"C:\temp\vostok.log", "new test");
+            File.WriteAllText(@"C:\temp\vostok.log", "new test");
             this.Settings.DebugLogger = message =>
             {
                 this.log.AppendLine(message);
-                //File.AppendAllText(@"C:\temp\vostok.log", message + Environment.NewLine);
+                File.AppendAllText(@"C:\temp\vostok.log", message + Environment.NewLine);
             };
         }
 

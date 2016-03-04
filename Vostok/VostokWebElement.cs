@@ -19,6 +19,8 @@
 
         private readonly VostokSearchContext context;
         private readonly Func<IWebElement> elementLookup;
+        private bool isNuked;
+
         public VostokWebElement(VostokSettings settings, IWebElement element, By selfSelector, ISearchContext parent, Func<ISearchContext, IWebElement> selfLookup)
         {
             this.settings = settings;
@@ -27,23 +29,33 @@
             this.origin = this.DetermineOrigin(this.element);
             this.elementLookup = () =>
                 {
-                    this.settings.DebugLogger($"resolving: {this.selfSelector}");
-                    var lookedupElement = selfLookup(parent);
-
-                    var currentUri = this.DetermineOrigin(this.element);
-
-                    if (this.origin != null)
+                    if (this.isNuked)
                     {
-                        if (!this.MatchesOriginStrictnessLevel(currentUri))
+                        this.settings.DebugLogger($"resolving: {this.selfSelector}");
+                        this.element = selfLookup(parent);
+                        this.isNuked = false;
+
+                        var currentUri = this.DetermineOrigin(this.element);
+
+                        if (this.origin != null)
                         {
-                            var message = $"Navigation occured between resolving elements. Original element was resolved on {this.origin} but a StaleElementReferenceException caused it to be re-resolved on {currentUri}. You can control the sensitivty of this check by changing SamePageOriginStrictness in the settings passed to the VostokWebDriver";
-                            throw new InvalidElementStateException(message);
+                            if (!this.MatchesOriginStrictnessLevel(currentUri))
+                            {
+                                var message = $"Navigation occured between resolving elements. Original element was resolved on {this.origin} but a StaleElementReferenceException caused it to be re-resolved on {currentUri}. You can control the sensitivty of this check by changing SamePageOriginStrictness in the settings passed to the VostokWebDriver";
+                                throw new InvalidElementStateException(message);
+                            }
                         }
                     }
 
-                    return lookedupElement;
+                    return this.element;
                 };
             this.context = new VostokSearchContext(this.settings, selfSelector, this, this.elementLookup);
+        }
+
+        internal void Nuke()
+        {
+            this.settings.DebugLogger($"Nuking {selfSelector}");
+            this.isNuked = true;
         }
 
         private bool MatchesOriginStrictnessLevel(Uri currentUri)
@@ -140,13 +152,13 @@
         {
             try
             {
-                query(this.element);
+                query(this.elementLookup());
             }
             catch (StaleElementReferenceException)
             {
-                this.settings.DebugLogger($"Element '{this.selfSelector}' is stale.");
+                this.settings.DebugLogger($"Element '{this.selfSelector}' is stale. - interaction failed");
 
-                this.element = this.elementLookup();
+                this.Nuke();
                 this.Interact(query);
             }
         }
@@ -155,13 +167,13 @@
         {
             try
             {
-                return query(this.element);
+                return query(this.elementLookup());
             }
             catch (StaleElementReferenceException)
             {
-                this.settings.DebugLogger($"Element '{this.selfSelector}' is stale.");
+                this.settings.DebugLogger($"Element '{this.selfSelector}' is stale. - interaction failed");
 
-                this.element = this.elementLookup();
+                this.Nuke();
                 return this.Interact(query);
             }
         }

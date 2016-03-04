@@ -24,27 +24,27 @@
         public IWebElement FindElement(By @by)
         {
             var element = this.context as IWebElement;
-            if (element != null)
+            this.settings.DebugLogger(element != null ? $"element->element: {@by}" : $"driver->element: {@by}");
+
+            try
             {
-                this.settings.DebugLogger($"element->element: {@by}");
-                try
-                {
-                    return new VostokWebElement(this.settings, element, this.selfSelector, this, ctx => ctx.FindElement(@by));
-                }
-                catch (StaleElementReferenceException)
-                {
-                    this.settings.DebugLogger($"Element '{this.selfSelector}' is stale.");
-
-                    this.context = this.selfLookup();
-                    return this.FindElement(@by);
-                }
+                var child = this.selfLookup == null
+                    ? this.context.FindElement(@by)
+                    : this.selfLookup().FindElement(@by);
+                
+                return new VostokWebElement(this.settings, child, @by, this.context, ctx => ctx.FindElement(@by));
             }
+            catch (StaleElementReferenceException)
+            {
+                this.settings.DebugLogger($"Element '{this.selfSelector}' is stale. - child element lookup failed");
+                var vostokElement = this.context as VostokWebElement;
+                if (vostokElement != null)
+                {
+                    vostokElement.Nuke();
+                }
 
-            //context is IWebDriver, no need to guard for stale element
-            this.settings.DebugLogger($"driver->element: {@by}");
-
-            element = this.context.FindElement(@by);
-            return new VostokWebElement(this.settings, element, @by, this.context, ctx => ctx.FindElement(@by));
+                return this.FindElement(@by);
+            }
         }
         
         public ReadOnlyCollection<IWebElement> FindElements(By @by)
@@ -59,34 +59,51 @@
                     try
                     {
                         element = this.selfLookup();
-                        return element.FindElements(@by)
-                        .Select((lmnt, i) => new VostokWebElement(this.settings, lmnt, @by, this, ctx => ctx.FindElements(@by).Skip(i).Single()));
+                        var children = element.FindElements(@by)
+                            .Select((lmnt, index) =>
+                            {
+                                return new VostokWebElement(this.settings, lmnt, @by, this.context,
+                                    ctx => ctx.FindElements(@by).ElementAt(index));
+                            })
+                            .ToArray();
+
+
+
+                        this.settings.DebugLogger($"Found {children.Count()} to {this.selfSelector} matching {@by}");
+                        return children;
                     }
                     catch (StaleElementReferenceException)
                     {
-                        this.settings.DebugLogger($"Element '{this.selfSelector}' is stale.");
+                        this.settings.DebugLogger($"Element '{this.selfSelector}' is stale. - children lookup failed");
+                        var vostokElement = this.context as VostokWebElement;
+                        if (vostokElement != null)
+                        {
+                            vostokElement.Nuke();
+                        }
 
-                        this.context = this.selfLookup();
                         return this.FindElements(@by);
                     }
                 }
 
+                this.settings.DebugLogger($"browser->elements: {@by}");
                 return this.context.FindElements(@by)
                     .Select((lmnt, index) =>
                     {
                         //each element must be able to re-resolve it self
                         //in this case, re-resolve all elements again and just pick the
                         //element that has the same index as before
-                        return new VostokWebElement(this.settings, lmnt, @by, this,
+                        return new VostokWebElement(this.settings, lmnt, @by, this.context,
                             ctx =>
                             {
-                                var children = selfLookup == null
+                                var children = (selfLookup == null
                                     ? this.context.FindElements(@by)
-                                    : this.selfLookup().FindElements(@by);
+                                    : this.selfLookup().FindElements(@by)).ToArray();
 
+                                this.settings.DebugLogger($"Found {children.Count()} matching {@by}");
                                 return children.ElementAt(index);
                             });
-                    });
+                    })
+                    .ToArray();
             });
         }
     }
