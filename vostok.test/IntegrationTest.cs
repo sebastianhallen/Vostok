@@ -33,6 +33,7 @@ namespace Vostok.Test
                         this.signal.WaitOne();
                     }
                 });
+            this.nancyThread.IsBackground = true;
             this.nancyThread.Start();
 
             this.Settings = new VostokSettings();
@@ -134,6 +135,24 @@ namespace Vostok.Test
             var bottom = this.Driver.FindElement(By.Id("top")).FindElement(By.Id("middle")).FindElement(By.Id("bottom"));
 
             this.VerifyContentChanged(bottom);
+        }
+
+        [Test]
+        public void Should_be_possible_to_reresolve_stale_parent_elements_when_searching_for_child_elements_from_an_element_context()
+        {
+            this.Driver.Navigate().GoToUrl(this.EndpointAddress + "Content/stale-element.html");
+
+            var middle = this.Driver.FindElement(By.Id("top")).FindElements(By.Id("middle"));
+
+            var hasReResolved = false;
+            this.retrier
+                    .Do(() => middle.Single().FindElements(By.Id("bottom")))
+                    .ForNoLongerThan(TimeSpan.FromSeconds(30))
+                    .Until(() => 
+                    {
+                        return (hasReResolved = this.log.ToString().Contains("Element 'By.Id: top' is stale."));
+                    });
+            Assert.That(hasReResolved);
         }
 
         [Test]

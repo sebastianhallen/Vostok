@@ -59,7 +59,8 @@
                     try
                     {
                         element = this.selfLookup();
-                        return element.FindElements(@by);
+                        return element.FindElements(@by)
+                        .Select((lmnt, i) => new VostokWebElement(this.settings, lmnt, @by, this, ctx => ctx.FindElements(@by).Skip(i).Single()));
                     }
                     catch (StaleElementReferenceException)
                     {
